@@ -1,0 +1,35 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conversao-distancia
+spec:
+  replicas: 1                                    #quantida de pod
+  selector:                                     #seleciona labels declaradas
+    matchLabels:                                #regra de selecao da label
+      app: conversao-distancia
+  template:                                     #template do pod
+    metadata:                                   # nao declara de novo, vai se dinamico
+      labels:
+        app: conversao-distancia                #precisa mesmo name do metadata
+    spec:                                       #especifica o pod, menor objeto do cluster, onde estao os containers
+      containers:                               # declara o container do pod, um para cada pod
+      - name: conversao-distancia               # nome do container dentro meu pod
+        image: gustavodelcoli/conversao-distancia:v2 # nome da imagem criado do container
+        ports: 
+          - containerPort: 5000                 # mesma porta do Dockerfile
+
+---     #entende que agora é outro
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: conversao-distancia
+  spec:
+    selector:
+      app: conversao-distancia
+    ports:
+    - port: 80
+      targetPort: 5000
+      #depois que criar o loadbalancer
+      nodePort: 30000 #mesma especificada no loadbalancer
+    type: NodePort #sem cloud provider, para acessar externamente
